@@ -16,7 +16,7 @@ public class UserService {
         userRepository.saveAndFlush(user);
     }
 
-    public User findByEmail(String email) {
+    public User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new RuntimeException("User with email " + email + " not found")
         );
@@ -26,23 +26,16 @@ public class UserService {
         userRepository.deleteByEmail(email);
     }
 
-    public void updateUserByEmail(String email, User user) {
-        User userEntity = findByEmail(email);
-
-        User userToUpdate = User.builder()
-                .email(user.getEmail() != null && !user.getEmail().isEmpty() ? user.getEmail() : email)
-                .build();
-    }
-
     public void updateUserById(Long id, User user) {
-        User userEntity = findById(id);
+        User userEntity = userRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User with id " + id + " not found")
+        );
 
         User userToUpdate = User.builder()
+                .name(user.getName() != null && !user.getName().isEmpty() ? user.getName() : userEntity.getName())
                 .email(user.getEmail() != null && !user.getEmail().isEmpty() ? user.getEmail() : userEntity.getEmail())
+                .id(user.getId())
                 .build();
-    }
-
-    public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow();
+        userRepository.saveAndFlush(userToUpdate);
     }
 }
